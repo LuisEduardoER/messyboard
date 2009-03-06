@@ -9,19 +9,26 @@ import javax.swing.JScrollPane;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
+import javax.swing.ListSelectionModel;
 
 import common.Message;
 import javax.swing.JLabel;
@@ -40,11 +47,13 @@ public class MainGUI extends JFrame implements ActionListener {
 	private JTable table_posts = null;
 	private JButton button_post = null;
 	private DefaultTableModel model;
-	Border border;
-	
-	private EbbClient ebbclient;	// client layer
+	private Border border;
 	private JTextField textField_title = null;
 	private JLabel label_title = null;
+	
+	private EbbClient ebbclient;	// client layer
+	private List<Message> message_list;	// holds current messages appearing in the table
+	private MainGUI parent;
 	/**
 	 * This method initializes
 	 * 
@@ -53,9 +62,10 @@ public class MainGUI extends JFrame implements ActionListener {
 		super("Electronic Bulletin Board");
 		this.ebbclient = client;
 		border = new LineBorder(Color.BLACK, 1);
+		this.parent = this;
 		initialize();
 	}
-
+	
 	/**
 	 * This method initializes this
 	 * 
@@ -135,8 +145,9 @@ public class MainGUI extends JFrame implements ActionListener {
 	 * @return javax.swing.JTable
 	 */
 	private JTable getJTable1() {
-		List<Message> message_list;
 		Object[][] data;
+		
+		
 		int num_post;	// number of posts initially
 		
 		message_list = new ArrayList<Message>();
@@ -149,12 +160,12 @@ public class MainGUI extends JFrame implements ActionListener {
 		data = new Object[num_post][3];
 		
 		for(int i=0; i < message_list.size(); i++) {
-			data[i][0] = message_list.get(i).getMessage();
+			data[i][0] = message_list.get(i).getTitle();
 			data[i][1] = message_list.get(i).getOwner();
 			data[i][2] = message_list.get(i).getDate();
 		}
 		
-		String[] columnNames = { "Discussion Title", "Owner", "Date Created" };
+		String[] columnNames = { "Discussion Title", "Owner", "Date Created"};
 /*
 		Object[][] data = {
 				{ "Mary", "Campione", "Snowboarding", new Integer(5),
@@ -178,6 +189,22 @@ public class MainGUI extends JFrame implements ActionListener {
 				}
 			};
 			table_posts.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+			table_posts.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			table_posts.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if(e.getClickCount() == 2) {
+						JTable target = (JTable) e.getSource();
+						int row = target.getSelectedRow();
+						System.out.println("Double click on row : " + row + "message id is : " + ebbclient.getLocalMessage(row).getId());
+						JDialog jdialog_posts_window = new Post_Window((JFrame) SwingUtilities.getWindowAncestor(parent), ebbclient, ebbclient.getLocalMessage(row));
+						jdialog_posts_window.setVisible(true);
+						//parent.message_list.get(row).setTitle(title)
+						model.setValueAt(aValue, row, 0);
+						System.out.println("TESTING THISSSSSSSSSSSSSSS");
+					}
+				}
+			});
+
 		}
 		return table_posts;
 	}
@@ -198,14 +225,14 @@ public class MainGUI extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
-		// TODO Auto-generated method stub
 		if (event.getSource() == button_post){
-			System.out.println("[gui]: " + textField_title.getText() +textPane_post.getText());
+			System.out.println("[gui]: " + textField_title.getText() + textPane_post.getText());
 			ebbclient.postMessage(textField_title.getText(), textPane_post.getText());
 			
 			model.insertRow(table_posts.getRowCount(),new Object[]{textField_title.getText(),"jack", "date"});
 			
 			textPane_post.setText("");
+			textField_title.setText("");
 		}
 		
 	}
