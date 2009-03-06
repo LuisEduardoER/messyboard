@@ -1,5 +1,7 @@
 package client;
 
+import javax.swing.JFrame;
+
 public class Main {
 	
 	/**
@@ -18,5 +20,7 @@ public class Main {
 		client = new EbbClient(args[0]);
 		gui = new MainGUI(client);
 		gui.setVisible(true);
+		
+		
 	}
 }

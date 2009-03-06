@@ -25,4 +25,6 @@ public interface EbbServerInterface extends Remote {
 	public String postMessage(Message message) throws RemoteException, Exception;
 	
 	public List<Message> viewMessages() throws RemoteException, Exception;
+	
+	public String updateMessage(Message message) throws RemoteException, Exception;
 }

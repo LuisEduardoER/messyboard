@@ -42,6 +42,7 @@ public class DatabaseImpl {
 		try {
 			stat = conn.createStatement();
 			stat.executeUpdate("drop table if exists postings;");
+			stat.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -52,6 +53,7 @@ public class DatabaseImpl {
 	      try {
 	    	stat = conn.createStatement();
 			stat.executeUpdate("create table postings (id integer primary key autoincrement, title, message, owner, postingDate TIMESTAMP);");
+			stat.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,6 +66,7 @@ public class DatabaseImpl {
 		String title;
 		String message;
 		String owner;
+		int id;
 		Date date;
 		Timestamp timestamp;
 		
@@ -72,6 +75,7 @@ public class DatabaseImpl {
 			rs = stat.executeQuery("select * from postings;");
 			
 			while (rs.next()) {
+				id = rs.getInt("id");
 				title = rs.getString("title");
 				message = rs.getString("message");
 				owner = rs.getString("owner");
@@ -81,19 +85,20 @@ public class DatabaseImpl {
 			    date = new Date(milliseconds);
 				
 			    Message message_object = new Message();
+			    message_object.setId(id);
 			    message_object.setTitle(title);
 				message_object.setMessage(message);
 				message_object.setOwner(owner);
 				message_object.setDate(date);
 				
 				message_list.add(message_object);
-				System.out.println("title= " + rs.getString("title") + "message = " + rs.getString("message")
+				System.out.println("id= " + id + "title= " + rs.getString("title") + "message = " + rs.getString("message")
 						+ " owner = " + rs.getString("owner") + "date = "
 						+ rs.getString("postingDate"));
 			}
 
 			rs.close();
-
+			stat.close();
 		} catch (SQLException e) {
 			transaction_success = false;
 			e.printStackTrace();
@@ -104,7 +109,7 @@ public class DatabaseImpl {
 	}
 	
 	public boolean postMessage(String title, String message, String owner) {
-		
+		ResultSet rs;
 		
 		/*
 		ResultSet rs;
@@ -135,7 +140,9 @@ public class DatabaseImpl {
 			conn.setAutoCommit(false);
 			prep.executeBatch();
 			conn.setAutoCommit(true);
-
+			rs = prep.getGeneratedKeys();
+			System.out.println("RESULT SET: " + rs.getInt(1));
+		    rs.close();
 		} catch (SQLException e) {
 			transaction_success = false;
 			e.printStackTrace();
@@ -143,6 +150,47 @@ public class DatabaseImpl {
 		
 		return transaction_success;
 	}
+	
+public boolean updateMessage(int id, String title, String message) {
+		Timestamp sqlDate = new java.sql.Timestamp(new java.util.Date().getTime());
+		ResultSet rs;
+		
+		System.out.println("Given values: " + id + " " + title + " " + message);
+		try {
+			stat = conn.createStatement();
+			stat.executeUpdate("update postings set message = '"+ message +"', title = '"+ title +"' where id = " + id +";");
+		} catch (SQLException e) {
+			transaction_success = false;
+			e.printStackTrace();
+		}
+		
+		
+		/*	try {
+			
+			
+			
+			
+			
+			
+			stat = conn.createStatement();
+			stat.executeUpdate("update postings set message = '"+ message +"' where id = " + id +";");
+			stat.close();
+			stat = conn.createStatement();			
+			rs = stat.executeQuery("select * from postings where id= " + id + ";");
+			//rs.next();
+			System.out.println("RESULT SET IS : " + rs.getString("message"));
+			rs.close();
+			//stat.executeUpdate("update postings set title = '"+ title +"', message ='"+ message + "', postingDate =" + sqlDate +" where id = " + id +";");
+			 * 
+			 * 
+		} catch (SQLException e) {
+			transaction_success = false;
+			e.printStackTrace();
+		}
+		*/
+		return transaction_success;
+	}
+	
 	
 	public void closeConnection() {
 		try {

@@ -47,8 +47,8 @@ public class EbbServerImpl extends UnicastRemoteObject implements EbbServerInter
     	i =0;
     	database = new DatabaseImpl();
     	database.startConnection();
-    	database.dropTable();
-    	database.createTable();
+    	//database.dropTable();
+    	//database.createTable();
     }
     
     public static void main(String[] args) {
@@ -67,7 +67,6 @@ public class EbbServerImpl extends UnicastRemoteObject implements EbbServerInter
     
 	@Override
 	public String postMessage(Message message) throws RemoteException, Exception {
-		
 		System.out.println("[Sever] Message posted " + message.getMessage());
 		
 		database.postMessage(message.getTitle(), message.getMessage(), message.getOwner());
@@ -78,6 +77,14 @@ public class EbbServerImpl extends UnicastRemoteObject implements EbbServerInter
 	@Override
 	public List<Message> viewMessages() throws RemoteException, Exception {
 		return database.viewMessages();		
+	}
+	
+	public String updateMessage(Message message) throws RemoteException, Exception {
+		System.out.println("[Server] Message updated" + message.getMessage());
+		
+		database.updateMessage(message.getId(), message.getTitle(), message.getMessage());
+		
+		return "successful";
 	}
 	
 }
