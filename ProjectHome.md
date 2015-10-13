@@ -1,0 +1,1 @@
+Electronic Bulletin Board implementation for graduate course. The idea is to learn RMI by creating a client-server application. Further work has to be done in the area of consistency.
